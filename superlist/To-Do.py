@@ -41,12 +41,14 @@ class NewVisitorTest(unittest.TestCase):
         # 刷新显示已输入事项
         sleep(3)
         table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
+        rows = table.find_elements_by_tag_name('td')
         for row in rows:
-            print('row ' + row)
-        self.assertTrue(
-            any(row.text == '1: By peacock feathers' for row.text in rows)
-        )
+            print(row.text)
+        # self.assertTrue(
+        #     any(row.text == '1: By peacock feathers' for row in rows)
+        # )
+        self.assertIn('1: By peacock feathers', [row.text for row in rows],
+                      '\n expected:\n 1: By peacock feathers\n now:\n%s' % table.text)
 
         # 页面显示新的待办事项输入框
         print('finish the test!')
