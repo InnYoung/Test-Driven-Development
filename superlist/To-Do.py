@@ -1,6 +1,7 @@
 # !/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import unittest
@@ -26,7 +27,7 @@ class NewVisitorTest(unittest.TestCase):
 
         # 检查页面是否正确
         self.assertIn('To-Do', self.browser.title)
-        head_text = self.browser.find_element_by_tag_name('h1')
+        head_text = self.browser.find_element_by_tag_name('h1').text
         self.assertIn('To-Do', head_text)
 
         # 页面提示输入待办事项
@@ -38,10 +39,13 @@ class NewVisitorTest(unittest.TestCase):
         input_box.send_keys(Keys.ENTER)
 
         # 刷新显示已输入事项
+        sleep(3)
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
+        for row in rows:
+            print('row ' + row)
         self.assertTrue(
-            any(row.text == '1: By peacock feathers' for row in rows)
+            any(row.text == '1: By peacock feathers' for row.text in rows)
         )
 
         # 页面显示新的待办事项输入框

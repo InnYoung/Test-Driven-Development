@@ -2,9 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>To-Do</title>
 </head>
 <body>
+    <h1>Your To-Do list</h1>
+    <form method="POST">
+        <input id="id_new_item" placeholder="Enter a to-do item">
+        {% csrf_token %}
+    </form>
 
+    <table id="id_list_table">
+        <tr>
+            <td>{{ new_item_text }}</td>
+        </tr>
+    </table>
 </body>
 </html>
