@@ -15,12 +15,12 @@ class NewVisitorTest(unittest.TestCase):
         # self.browser.quit()
         pass
 
+    def check_row_in_table(self, input_text):
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('td')
+        self.assertIn(input_text, [row.text for row in rows],
+                      '\n expected:\n %s\n now:\n %s' % (input_text, table.text))
     # 必须以test_开头
-    # def test_get_url_with_to_do_list(self):
-    #     self.browser.get('http://localhost:8000')
-    #     self.assertIn('To-Do', self.browser.title)
-    #     self.fail('Finish the test!')
-
     def test_can_start_a_list_and_retrieve_it_later(self):
         # 打开目标页面
         self.browser.get('http://localhost:8000')
@@ -39,16 +39,17 @@ class NewVisitorTest(unittest.TestCase):
         input_box.send_keys(Keys.ENTER)
 
         # 刷新显示已输入事项
-        sleep(3)
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('td')
-        for row in rows:
-            print(row.text)
-        # self.assertTrue(
-        #     any(row.text == '1: By peacock feathers' for row in rows)
-        # )
-        self.assertIn('1: By peacock feathers', [row.text for row in rows],
-                      '\n expected:\n 1: By peacock feathers\n now:\n%s' % table.text)
+        sleep(1)
+        self.check_row_in_table('1 : By peacock feathers')
+
+        # 继续输入待办事项,并显示
+        input_box = self.browser.find_element_by_id('id_new_item')
+        self.assertEqual(input_box.get_attribute('placeholder'), 'Enter a to-do item')
+        input_box.send_keys('Make a fly')
+        input_box.send_keys(Keys.ENTER)
+        sleep(1)
+        self.check_row_in_table('1 : By peacock feathers')
+        self.check_row_in_table('2 : Make a fly')
 
         # 页面显示新的待办事项输入框
         print('finish the test!')
