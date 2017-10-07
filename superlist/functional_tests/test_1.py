@@ -4,10 +4,11 @@
 from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from django.test import LiveServerTestCase
 import unittest
 
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
 
@@ -20,10 +21,11 @@ class NewVisitorTest(unittest.TestCase):
         rows = table.find_elements_by_tag_name('td')
         self.assertIn(input_text, [row.text for row in rows],
                       '\n expected:\n %s\n now:\n %s' % (input_text, table.text))
+
     # 必须以test_开头
     def test_can_start_a_list_and_retrieve_it_later(self):
         # 打开目标页面
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url)
 
         # 检查页面是否正确
         self.assertIn('To-Do', self.browser.title)
@@ -37,10 +39,14 @@ class NewVisitorTest(unittest.TestCase):
         # 输入待办事项，回车确认
         input_box.send_keys('By peacock feathers')
         input_box.send_keys(Keys.ENTER)
+        sleep(1)
+
+        # 转到新url
+        user_1_list_url = self.browser.current_url
+        self.assertRegex(user_1_list_url, '/lists/.+')
 
         # 刷新显示已输入事项
-        sleep(1)
-        self.check_row_in_table('1 : By peacock feathers')
+        self.check_row_in_table('1 : Buy peacock feathers')
 
         # 继续输入待办事项,并显示
         input_box = self.browser.find_element_by_id('id_new_item')
@@ -48,11 +54,32 @@ class NewVisitorTest(unittest.TestCase):
         input_box.send_keys('Make a fly')
         input_box.send_keys(Keys.ENTER)
         sleep(1)
-        self.check_row_in_table('1 : By peacock feathers')
+        self.check_row_in_table('1 : Buy peacock feathers')
         self.check_row_in_table('2 : Make a fly')
 
         # 页面显示新的待办事项输入框
-        print('finish the test!')
 
-if __name__ == '__main__':
-    unittest.main(warnings='ignore')
+        # 用户2访问网站
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
+        self.browser.get(self.live_server_url)
+
+        # 显示初始页面无用户1数据
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertNotIn('Make a fly', page_text)
+
+        # 用户2创建新清单
+        input_box = self.browser.find_element_by_id('id_new_item')
+        input_box.send_keys('Buy milk')
+        input_box.send_keys(Keys.ENTER)
+
+        # 生成新url
+        user_2_list_url = self.browser.current_url
+        self.assertRegex(user_2_list_url, '/lists/.+')
+        self.assertNotEqual(user_1_list_url, user_2_list_url)
+
+        # 再次确认没有用户1的数据
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertNotIn('Make a fly', page_text)
