@@ -51,33 +51,50 @@ class ListAndItemModelTest(TestCase):
 
 class NewListTest(TestCase):
     def test_saving_a_POST_request(self):
-        self.client.post('/lists/new/', data={'item_text': 'A new list item'})
+        self.client.post('/list/new/', data={'item_text': 'A new list item'})
 
         self.assertEqual(Item.objects.count(), 1)
         new_item = Item.objects.first()
         self.assertEqual(new_item.text, 'A new list item')
 
     def test_redirects_after_POST(self):
-        response = self.client.post('/lists/new/', data={'item_text': 'A new list item'})
+        response = self.client.post('/list/new/', data={'item_text': 'A new list item'})
 
         # self.assertEqual(response.status_code, 302)
-        # self.assertRegex(response['location'], r'/lists/the_only_list/$')
-        self.assertRedirects(response, '/lists/the_only_list/')
+        new_list = List.objects.first()
+        # self.assertRedirects(response, '/lists/%d/' % new_list.id)
+        self.assertRegex(response.url, r'/lists/%d/$' % new_list.id)
 
 
 class ListViewTest(TestCase):
     def test_uses_list_template(self):
-        response = self.client.get('/lists/the_only_list/')
+        list_ = List.objects.create()
+        response = self.client.get('/lists/%d/' % list_.id)
         self.assertTemplateUsed(response, 'list.html')
 
-    def test_display_all_lists(self):
-        list_ = List()
-        list_.save()
+    # def test_display_all_lists(self):
+    #     list_ = List()
+    #     list_.save()
+    #
+    #     Item.objects.create(text='itemey 1', list=list_)
+    #     Item.objects.create(text='itemey 2', list=list_)
+    #
+    #     response = self.client.get('/lists/the_only_list/')
+    #
+    #     self.assertContains(response, 'itemey 1')
+    #     self.assertContains(response, 'itemey 2')
 
-        Item.objects.create(text='itemey 1', list=list_)
-        Item.objects.create(text='itemey 2', list=list_)
+    def test_displays_only_list(self):
+        correct_list = List.objects.create()
+        Item.objects.create(text='itemey 1', list=correct_list)
+        Item.objects.create(text='itemey 2', list=correct_list)
+        other_list = List.objects.create()
+        Item.objects.create(text='other itemey 1', list=other_list)
+        Item.objects.create(text='other itemey 2', list=other_list)
 
-        response = self.client.get('/lists/the_only_list/')
+        response = self.client.get('/list/%d' % correct_list.id)
 
         self.assertContains(response, 'itemey 1')
         self.assertContains(response, 'itemey 2')
+        self.assertNotContains(response, 'other itemey 1')
+        self.assertNotContains(response, 'other itemey 2')
