@@ -37,7 +37,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertEqual(input_box.get_attribute('placeholder'), 'Enter a to-do item')
 
         # 输入待办事项，回车确认
-        input_box.send_keys('By peacock feathers')
+        input_box.send_keys('Buy peacock feathers')
         input_box.send_keys(Keys.ENTER)
         sleep(1)
 
@@ -61,6 +61,7 @@ class NewVisitorTest(LiveServerTestCase):
 
         # 用户2访问网站
         self.browser.quit()
+        sleep(2)
         self.browser = webdriver.Firefox()
         self.browser.get(self.live_server_url)
 
@@ -73,6 +74,7 @@ class NewVisitorTest(LiveServerTestCase):
         input_box = self.browser.find_element_by_id('id_new_item')
         input_box.send_keys('Buy milk')
         input_box.send_keys(Keys.ENTER)
+        sleep(1)
 
         # 生成新url
         user_2_list_url = self.browser.current_url
