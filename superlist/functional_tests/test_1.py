@@ -26,6 +26,7 @@ class NewVisitorTest(LiveServerTestCase):
     def test_can_start_a_list_and_retrieve_it_later(self):
         # 打开目标页面
         self.browser.get(self.live_server_url)
+        # sleep(3)
 
         # 检查页面是否正确
         self.assertIn('To-Do', self.browser.title)
@@ -39,7 +40,7 @@ class NewVisitorTest(LiveServerTestCase):
         # 输入待办事项，回车确认
         input_box.send_keys('Buy peacock feathers')
         input_box.send_keys(Keys.ENTER)
-        sleep(1)
+        sleep(2)
 
         # 转到新url
         user_1_list_url = self.browser.current_url
